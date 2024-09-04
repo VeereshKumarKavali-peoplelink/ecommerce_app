@@ -1,0 +1,11 @@
+.cart-list {
+    padding-left: 0px;
+    display: flex;
+    flex-direction: column;
+
+  }
+  
+
+  .cart-summary{
+    align-self: flex-end;
+  }

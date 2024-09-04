@@ -1,0 +1,65 @@
+.proceed-btn{
+    font-family: 'Roboto';
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 16px;
+    color: #ffffff;
+    background-color: #0967d2;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+}
+
+.order-amount {
+    font-family: 'Roboto';
+    font-weight: bold;
+    font-size: 26px;
+    color: black;
+
+}
+
+.order-text {
+    font-family: 'Roboto';
+    font-weight: 500;
+    font-size: 18px;
+    color: black;
+ 
+}
+
+.confirmation-modal {
+    background-color: #fff;
+    padding: 20px;
+    max-width: 500px;
+    margin: auto;
+    border-radius: 10px;
+  }
+  
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .payment-options {
+    margin-top: 20px;
+  }
+  
+  .payment-options label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
