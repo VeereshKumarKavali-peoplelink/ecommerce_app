@@ -1,5 +1,6 @@
 import CartContext from '../../context/CartContext';
-import Modal from 'react-modal';
+import {useState} from 'react';
+
 import './index.css';
 
 const CartSummary = () => {
@@ -19,6 +20,10 @@ const CartSummary = () => {
     setPaymentMethod(event.target.value);
   };
 
+  const handleConfirm = ()=>{
+    setModalIsOpen(false);
+  }
+
     return (<CartContext.Consumer>
         {value => {
             const { cartList } = value;
@@ -30,43 +35,39 @@ const CartSummary = () => {
                 <>
                     <p className="order-text">Order Total: <span className="order-amount">{totalAmount}/-</span><br />{cartList.length} items in cart</p>
                     <button className="proceed-btn" onClick={openModal}>Proceed</button>
-                    <Modal
-                        isOpen={modalIsOpen}
-                        onRequestClose={closeModal}
-                        contentLabel="Confirmation Modal"
-                        className="confirmation-modal"
-                        overlayClassName="modal-overlay"
-                    >
-                        <h2>Are you sure you want to checkout?</h2>
-                        <div className="payment-options">
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="Cash on Delivery"
-                                    checked={paymentMethod === 'Cash on Delivery'}
-                                    onChange={handlePaymentChange}
-                                />
-                                Cash on Delivery
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="Online Payment"
-                                    checked={paymentMethod === 'Online Payment'}
-                                    onChange={handlePaymentChange}
-                                />
-                                Online Payment
-                            </label>
-                        </div>
-                        <div className="modal-buttons">
-                            <button onClick={closeModal}>Cancel</button>
-                            <button onClick={() => {
-                                closeModal();
-                                console.log('Payment Method:', paymentMethod);
-                                alert(`You chose ${paymentMethod}. Proceeding to checkout.`);
-                            }}>Confirm</button>
-                        </div>
-                    </Modal>
+
+                    {modalIsOpen && (
+                            <div className="modal-overlay">
+                                <div className="modal-content">
+                                    <h2>Are you sure you want to check out?</h2>
+                                    <div className="payment-options">
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                value="Cash on Delivery"
+                                                checked={paymentMethod === 'Cash on Delivery'}
+                                                onChange={handlePaymentChange}
+                                            />
+                                            Cash on Delivery
+                                        </label>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                value="Online"
+                                                checked={paymentMethod === 'Online'}
+                                                onChange={handlePaymentChange}
+                                            />
+                                            Online
+                                        </label>
+                                    </div>
+                                    <div className="modal-actions">
+                                        <button onClick={handleConfirm}>OK</button>
+                                        <button onClick={closeModal}>Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                   
                 </>
             )
         }}

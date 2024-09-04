@@ -6,7 +6,8 @@ import { FaRegStar } from "react-icons/fa";
 
 import CartContext from '../../context/CartContext'
 
-import Header from '../Header'
+import Header from '../Header';
+import config from '../../config';
 
 
 import './index.css'
@@ -50,7 +51,7 @@ class ProductItemDetails extends Component {
       apiStatus: apiStatusConstants.inProgress,
     })
     const jwtToken = Cookies.get('jwt_token')
-    const apiUrl = `https://localhost:3000/products/${id}`
+    const apiUrl = `${config.API_BASE_URL}/products/${id}`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,

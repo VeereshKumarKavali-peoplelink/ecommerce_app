@@ -1,36 +1,47 @@
 const express = require("express");
-const { open } = require("sqlite");
-const sqlite3 = require("sqlite3");
-const path = require("path");
+const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-
-const databasePath = path.join(__dirname, "userData.db");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
-
 app.use(express.json());
-
-let database = null;
-
-const initializeDbAndServer = async () => {
-    try {
-        database = await open({
-            filename: databasePath,
-            driver: sqlite3.Database,
-        });
-
-        app.listen(3000, () =>
-            console.log("Server Running at http://localhost:3000/")
-        );
-    } catch (error) {
-        console.log(`DB Error: ${error.message}`);
-        process.exit(1);
-    }
-};
-
-initializeDbAndServer();
+app.use(cors());
 
 
+const mongoURI = process.env.MONGO_URI;
+const port = process.env.port;
+
+app.listen(port, ()=>{
+    console.log(`server is running at port ${port}`);
+})
+
+mongoose.connect(mongoURI)
+    .then(() => console.log("MongoDB Connected..."))
+    .catch((error) => console.log(`DB Error: ${error.message}`));
+
+// Define User Schema
+const userSchema = new mongoose.Schema({
+    username: String,
+    email: { type: String, unique: true },
+    password: String,
+    gender: String,
+});
+
+// Define Product Schema
+const productSchema = new mongoose.Schema({
+    title: String,
+        brand: String,
+        price: Number,
+        id: Number,
+        imageUrl: String,
+        rating: String,
+});
+
+const User = mongoose.model("User", userSchema);
+const Product = mongoose.model("Product", productSchema);
 
 function authenticateToken(request, response, next) {
     let jwtToken;
@@ -39,13 +50,11 @@ function authenticateToken(request, response, next) {
         jwtToken = authHeader.split(" ")[1];
     }
     if (jwtToken === undefined) {
-        response.status(401);
-        response.send("Invalid JWT Token");
+        response.status(401).send("Invalid JWT Token");
     } else {
-        jwt.verify(jwtToken, "MY_SECRET_TOKEN", async (error, payload) => {
+        jwt.verify(jwtToken, "MY_SECRET_TOKEN", (error, payload) => {
             if (error) {
-                response.status(401);
-                response.send("Invalid JWT Token");
+                response.status(401).send("Invalid JWT Token");
             } else {
                 request.email = payload.email;
                 next();
@@ -54,7 +63,6 @@ function authenticateToken(request, response, next) {
     }
 }
 
-
 const validatePassword = (password) => {
     return password.length > 5;
 };
@@ -62,110 +70,79 @@ const validatePassword = (password) => {
 // API to signup 
 app.post("/signup", async (request, response) => {
     try {
-        const { username, name, password, gender } = request.body;
+        console.log("api hitted++++++");
+        const { username, email, password, gender } = request.body;
+        console.log(request.body);
+        console.log(password);
         const hashedPassword = await bcrypt.hash(password, 10);
-        const selectUserQuery = `SELECT * FROM user WHERE email = '${email}';`;
-        const databaseUser = await database.get(selectUserQuery);
+        console.log(hashedPassword)
 
-        if (databaseUser === undefined) {
-            const createUserQuery = `
-                        INSERT INTO
-                                user (username, email, password, gender)
-                        VALUES
-                                    (
-                                    '${username}',
-                                    '${email}',
-                                    '${hashedPassword}',
-                                    '${gender}'
-                                    );`;
+        const existingUser = await User.findOne({ email });
+        console.log(existingUser);
+        if (!existingUser) {
             if (validatePassword(password)) {
-                await database.run(createUserQuery);
-                response.send("User created successfully");
+                const newUser = new User({ username, email, password: hashedPassword, gender });
+                await newUser.save();
+                response.send({msg:"User created successfully"});
             } else {
-                response.status(400);
-                response.send("Password is too short");
+                response.status(400).send({err_msg: "Password is too short"});
             }
         } else {
-            response.status(400);
-            response.send("User already exists");
+            response.status(400).send({err_msg: "User already exists"});
         }
     } catch (error) {
-        response.status(500).send({ err_msg: "Internal Server Error" })
+        response.status(500).send({ err_msg: "Internal Server Error" });
     }
-
 });
 
-
-//API to login
+// API to login
 app.post("/login", async (request, response) => {
     try {
         const { email, password } = request.body;
-        const selectUserQuery = `SELECT * FROM user WHERE email = '${email}';`;
-        const databaseUser = await database.get(selectUserQuery);
-        if (databaseUser === undefined) {
-            response.status(400);
-            response.send("Invalid user");
+        const user = await User.findOne({ email });
+        if (!user) {
+            response.status(400).send({err_msg: "Invalid user"});
         } else {
-            const isPasswordMatched = await bcrypt.compare(
-                password,
-                databaseUser.password
-            );
-            if (isPasswordMatched === true) {
-                const payload = {
-                    email: email,
-                };
+            const isPasswordMatched = await bcrypt.compare(password, user.password);
+            if (isPasswordMatched) {
+                const payload = { email: user.email };
                 const jwtToken = jwt.sign(payload, "MY_SECRET_TOKEN");
-                response.send({ jwtToken });
+                response.send({ jwtToken , ok: true});
             } else {
-                response.status(400);
-                response.send("Invalid password");
+                response.status(400).send({err_msg: "Invalid password"});
             }
         }
     } catch (error) {
-        response.status(500).send({ err_msg: "Internal Server Error" })
+        response.status(500).send({ err_msg: "Internal Server Error" });
     }
 });
 
-
-
-
-//API to GET all products 
+// API to GET all products 
 app.get("/products/", authenticateToken, async (request, response) => {
     try {
         const { sort_by = "PRICE_HIGH" } = request.query;
-        const order = sort_by === 'PRICE_HIGH' ? 'DESC' : 'ASC';
-        const getProductsQuery = `
-        SELECT
-          *
-        FROM
-          product
-        ORDER BY price ${order};`;
-        const productsArray = await database.all(getProductsQuery);
-        response.send({ products: productsArray });
+        const order = sort_by === 'PRICE_HIGH' ? -1 : 1; // DESC: -1, ASC: 1
+        const products = await Product.find().sort({ price: order });
+        response.send({ products });
     } catch (error) {
-        response.status(500).send({ err_msg: "Internal Server Error" })
-    }
-})
-
-
-//API to GET a particular product
-app.get("/products/:productId/", authenticateToken, async (request, response) => {
-    try {
-        const { productId } = request.params;
-        const getProductQuery = `
-          SELECT 
-            *
-          FROM 
-            product
-          WHERE 
-            id = ${productId};`;
-        const product = await database.get(getProductQuery);
-        response.send({ product });
-    } catch (error) {
-        response.status(500).send({ err_msg: "Internal Server Error" })
+        response.status(500).send({ err_msg: "Internal Server Error" });
     }
 });
 
-
+// API to GET a particular product
+app.get("/products/:productId/", authenticateToken, async (request, response) => {
+    try {
+        const { productId } = request.params;
+        console.log(productId);
+        const product = await Product.findOne({id: productId});
+        if (product) {
+            response.send(product);
+        } else {
+            response.status(404).send("Product not found");
+        }
+    } catch (error) {
+        response.status(500).send({ err_msg: "Internal Server Error" });
+    }
+});
 
 module.exports = app;

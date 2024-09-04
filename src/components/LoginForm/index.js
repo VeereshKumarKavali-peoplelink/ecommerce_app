@@ -1,6 +1,8 @@
 import { Component } from 'react'
+import {Link} from 'react-router-dom';
 import Cookies from 'js-cookie'
 import './index.css'
+import config from '../../config';
 
 class LoginForm extends Component {
     state = {
@@ -33,15 +35,19 @@ class LoginForm extends Component {
         event.preventDefault()
         const { email, password } = this.state
         const userDetails = { email, password }
-        const url = 'http://localhost:3000/login'
+        const url = `${config.API_BASE_URL}/login`
         const options = {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
             body: JSON.stringify(userDetails),
         }
         const response = await fetch(url, options)
         const data = await response.json()
-        if (response.ok === true) {
-            this.onSubmitSuccess(data.jwt_token)
+        if (data.ok === true) {
+            this.onSubmitSuccess(data.jwtToken)
         } else {
             this.onSubmitFailure(data.error_msg)
         }

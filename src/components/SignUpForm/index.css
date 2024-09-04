@@ -42,6 +42,13 @@
     margin-top: 20px;
     width: 100%;
   }
+
+  .input-container-gender {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    width: 100%;
+  }
   
   .input-label {
     margin-bottom: 0px;

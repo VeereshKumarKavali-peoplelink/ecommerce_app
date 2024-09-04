@@ -5,6 +5,7 @@ import Cookies from 'js-cookie'
 import ProductCard from '../ProductCard'
 import ProductsHeader from '../ProductsHeader'
 import './index.css'
+import config from '../../config';
 
 const sortbyOptions = [
   {
@@ -34,7 +35,7 @@ class AllProductsSection extends Component {
     })
     const jwtToken = Cookies.get('jwt_token')
     const {activeOptionId} = this.state
-    const apiUrl = `https://localhost:3000/products?sort_by=${activeOptionId}`
+    const apiUrl = `${config.API_BASE_URL}/products?sort_by=${activeOptionId}`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,

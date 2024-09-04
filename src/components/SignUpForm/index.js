@@ -1,5 +1,7 @@
 import { Component } from 'react'
-import './index.css'
+import {Link} from 'react-router-dom';
+import './index.css';
+import config from '../../config';
 
 class SignUpForm extends Component {
     state = {
@@ -14,6 +16,10 @@ class SignUpForm extends Component {
     handleGenderChange = (event) => {
         this.setState({ gender: event.target.value })
     };
+
+    onChangeEmail = event => {
+        this.setState({ email: event.target.value })
+    }
 
 
     onChangeUsername = event => {
@@ -37,17 +43,23 @@ class SignUpForm extends Component {
         event.preventDefault()
         const { username, password, email } = this.state
         const userDetails = { username, password, email }
-        const url = 'http://localhost:3000/signup'
+        const url = `${config.API_BASE_URL}/signup`
         const options = {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
             body: JSON.stringify(userDetails),
         }
         const response = await fetch(url, options)
         const data = await response.json()
-        if (response.ok === true) {
+       
+        console.log(data);
+        if (data.msg === "User created successfully") {
             this.onSubmitSuccess()
         } else {
-            this.onSubmitFailure(data.error_msg)
+            this.onSubmitFailure(data.err_msg)
         }
     }
 
@@ -88,7 +100,7 @@ class SignUpForm extends Component {
     }
 
     renderEmailField = () => {
-        const { username } = this.state
+        const { email} = this.state
         return (
             <>
                 <label className="input-label" htmlFor="email">
@@ -106,21 +118,25 @@ class SignUpForm extends Component {
     }
 
     render() {
-        const { showSubmitError, errorMsg } = this.state
+        const { showSubmitError, errorMsg, gender, email } = this.state
         return (
             <div className="signup-form-container">
                 <form className="form-container" onSubmit={this.submitForm}>
                     <div className="input-container">{this.renderUsernameField()}</div>
                     <div className="input-container">{this.renderPasswordField()}</div>
                     <div className="input-container">{this.renderEmailField()}</div>
-                    <div style={{ marginBottom: '5px', marginTop: '5px' }}>
-                        <h1 class="gender-field-heading">Gender</h1>
+                    <div className="input-container-gender"  style={{ marginBottom: '5px', marginTop: '5px' }}>
+                        <h1 className="input-label">Gender</h1>
+                        <div>
                         <input type="radio" name="gender" id="genderMale" value="Male" checked={gender === 'Male'}
                             onChange={this.handleGenderChange} />
-                        <label for="genderMale" style={{ marginLeft: '5px' }}>Male</label>
+                        <label htmlFor="genderMale" >Male</label>
+                        </div>
+                        <div>
                         <input type="radio" name="gender" id="genderFemale" value="Female" checked={gender === 'Female'}
                             onChange={this.handleGenderChange} />
-                        <label for="genderFemale" style={{ marginLeft: '5px' }}>Female</label>
+                        <label htmlFor="genderFemale" style={{ marginLeft: '5px' }}>Female</label>
+                        </div>
                     </div>
                     <button type="submit" className="signup-button">
                         Sign Up

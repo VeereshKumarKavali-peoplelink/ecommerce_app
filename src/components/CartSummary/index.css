@@ -35,31 +35,37 @@
     margin: auto;
     border-radius: 10px;
   }
-  
-  .modal-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .payment-options {
-    margin-top: 20px;
-  }
-  
-  .payment-options label {
-    display: block;
-    margin-bottom: 10px;
-  }
-  
-  .modal-buttons {
-    margin-top: 20px;
-    display: flex;
-    justify-content: space-between;
-  }
-  
+  /* index.css */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+}
+
+.payment-options {
+  margin: 20px 0;
+}
+
+.payment-options label {
+  display: block;
+  margin: 5px 0;
+}
+
+.modal-actions button {
+  margin: 0 5px;
+}
