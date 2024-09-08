@@ -32,12 +32,18 @@ const userSchema = new mongoose.Schema({
 
 // Define Product Schema
 const productSchema = new mongoose.Schema({
-    title: String,
+        title: String,
         brand: String,
         price: Number,
         id: Number,
-        imageUrl: String,
+        image_url: String,
         rating: String,
+        style: String,
+        description: String,
+        total_reviews: Number,
+        availability: String
+
+
 });
 
 const User = mongoose.model("User", userSchema);
