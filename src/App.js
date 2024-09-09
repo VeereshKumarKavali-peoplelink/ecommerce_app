@@ -12,11 +12,15 @@ import ProtectedRoute from './components/ProtectedRoute'
 import CartContext from './context/CartContext'
 
 import './App.css'
+import CartItem from './components/CartItem';
+
 
 
 class App extends Component {
+   userId = JSON.parse(localStorage.getItem("userId")); 
+
   state = {
-    cartList: [],
+    cartList: JSON.parse(localStorage.getItem(this.userId)) || []
   }
 
   addCartItem = product => {
@@ -40,13 +44,18 @@ class App extends Component {
         // If product doesn't exist, add it to the cart with an initial quantity
         return { cartList: [...cartList, product]};
       }
+    }, ()=>{
+      const {cartList} = this.state;
+      localStorage.setItem(this.userId, JSON.stringify(cartList));
+     console.log(cartList);
     });
 
   }
 
   deleteCartItem = (id) => {
     const {cartList} = this.state
-    const filteredList = cartList.filter((eachItem)=> eachItem.id !== id)
+    const filteredList = cartList.filter((eachItem)=> eachItem.id !== id);
+    localStorage.setItem(this.userId, JSON.stringify(filteredList));
     this.setState({cartList: filteredList})
   }
 
@@ -58,6 +67,7 @@ class App extends Component {
       }
       return eachItem
     })
+    localStorage.setItem(this.userId, JSON.stringify(updatedList));
     this.setState({cartList: updatedList})
   }
 
@@ -69,6 +79,7 @@ class App extends Component {
       }
       return eachItem
     })
+   localStorage.setItem(this.userId, JSON.stringify(updatedList));
     this.setState({cartList: updatedList})
   }
 

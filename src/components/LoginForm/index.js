@@ -20,7 +20,21 @@ class LoginForm extends Component {
         this.setState({ password: event.target.value })
     }
 
-    onSubmitSuccess = jwtToken => {
+    onSubmitSuccess = async(jwtToken) => {
+
+        const url = `${config.API_BASE_URL}/user`
+        const options = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                Authorization: `Bearer ${jwtToken}`
+              },
+
+        }
+        const response = await fetch(url, options)
+        const data = await response.json()
+        localStorage.setItem("userId", JSON.stringify(data.userId))
         const { history } = this.props
 
         Cookies.set('jwt_token', jwtToken, { expires: 30 })
@@ -49,7 +63,7 @@ class LoginForm extends Component {
         if (data.ok === true) {
             this.onSubmitSuccess(data.jwtToken)
         } else {
-            this.onSubmitFailure(data.error_msg)
+            this.onSubmitFailure(data.err_msg)
         }
     }
 

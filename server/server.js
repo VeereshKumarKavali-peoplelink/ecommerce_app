@@ -10,17 +10,27 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
 const mongoURI = process.env.MONGO_URI;
-const port = process.env.port;
+const port = process.env.PORT || 3005;
 
-app.listen(port, ()=>{
-    console.log(`server is running at port ${port}`);
-})
 
-mongoose.connect(mongoURI)
-    .then(() => console.log("MongoDB Connected..."))
-    .catch((error) => console.log(`DB Error: ${error.message}`));
+
+const initializeDbAndServer = async () => {
+    try {
+        await mongoose.connect(mongoURI)
+            .then(() => console.log("MongoDB Connected..."));
+
+        app.listen(port, () => {
+            console.log(`Server is running at port ${port}`);
+        });
+    } catch (error) {
+        console.log(`DB Error: ${error.message}`);
+        process.exit(1);
+    }
+};
+
+initializeDbAndServer();
+
 
 // Define User Schema
 const userSchema = new mongoose.Schema({
@@ -32,16 +42,16 @@ const userSchema = new mongoose.Schema({
 
 // Define Product Schema
 const productSchema = new mongoose.Schema({
-        title: String,
-        brand: String,
-        price: Number,
-        id: Number,
-        image_url: String,
-        rating: String,
-        style: String,
-        description: String,
-        total_reviews: Number,
-        availability: String
+    title: String,
+    brand: String,
+    price: Number,
+    id: Number,
+    image_url: String,
+    rating: String,
+    style: String,
+    description: String,
+    total_reviews: Number,
+    availability: String
 
 
 });
@@ -89,12 +99,12 @@ app.post("/signup", async (request, response) => {
             if (validatePassword(password)) {
                 const newUser = new User({ username, email, password: hashedPassword, gender });
                 await newUser.save();
-                response.send({msg:"User created successfully"});
+                response.send({ msg: "User created successfully" });
             } else {
-                response.status(400).send({err_msg: "Password is too short"});
+                response.status(400).send({ err_msg: "Password is too short" });
             }
         } else {
-            response.status(400).send({err_msg: "User already exists"});
+            response.status(400).send({ err_msg: "User already exists" });
         }
     } catch (error) {
         response.status(500).send({ err_msg: "Internal Server Error" });
@@ -107,21 +117,34 @@ app.post("/login", async (request, response) => {
         const { email, password } = request.body;
         const user = await User.findOne({ email });
         if (!user) {
-            response.status(400).send({err_msg: "Invalid user"});
+            response.status(400).send({ err_msg: "Invalid user" });
         } else {
             const isPasswordMatched = await bcrypt.compare(password, user.password);
             if (isPasswordMatched) {
                 const payload = { email: user.email };
                 const jwtToken = jwt.sign(payload, "MY_SECRET_TOKEN");
-                response.send({ jwtToken , ok: true});
+                response.send({ jwtToken, ok: true });
             } else {
-                response.status(400).send({err_msg: "Invalid password"});
+                response.status(400).send({ err_msg: "Invalid password" });
             }
         }
     } catch (error) {
         response.status(500).send({ err_msg: "Internal Server Error" });
     }
 });
+
+
+//API to get user
+app.get("/user", authenticateToken, async (request, response)=>{
+    try{
+        const {email} = request;
+        const user = await User.findOne({ email }, {_id: true, email: true});
+        console.log("+++++++",user);
+        response.send({userId: user._id});
+    }catch(error){
+        response.status(500).send({ err_msg: "Internal Server Error" });
+    }
+})
 
 // API to GET all products 
 app.get("/products/", authenticateToken, async (request, response) => {
@@ -140,7 +163,7 @@ app.get("/products/:productId/", authenticateToken, async (request, response) =>
     try {
         const { productId } = request.params;
         console.log(productId);
-        const product = await Product.findOne({id: productId});
+        const product = await Product.findOne({ id: productId });
         if (product) {
             response.send(product);
         } else {
