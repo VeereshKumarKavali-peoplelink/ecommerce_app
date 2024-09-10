@@ -13,14 +13,12 @@ import CartContext from './context/CartContext'
 
 import './App.css'
 import CartItem from './components/CartItem';
-
+let userId = JSON.parse(localStorage.getItem("userId"));
 
 
 class App extends Component {
-   userId = JSON.parse(localStorage.getItem("userId")); 
-
   state = {
-    cartList: JSON.parse(localStorage.getItem(this.userId)) || []
+    cartList: JSON.parse(localStorage.getItem(userId)) || []
   }
 
   addCartItem = product => {
@@ -46,7 +44,7 @@ class App extends Component {
       }
     }, ()=>{
       const {cartList} = this.state;
-      localStorage.setItem(this.userId, JSON.stringify(cartList));
+      localStorage.setItem(userId, JSON.stringify(cartList));
      console.log(cartList);
     });
 
@@ -55,7 +53,7 @@ class App extends Component {
   deleteCartItem = (id) => {
     const {cartList} = this.state
     const filteredList = cartList.filter((eachItem)=> eachItem.id !== id);
-    localStorage.setItem(this.userId, JSON.stringify(filteredList));
+    localStorage.setItem(userId, JSON.stringify(filteredList));
     this.setState({cartList: filteredList})
   }
 
@@ -67,7 +65,7 @@ class App extends Component {
       }
       return eachItem
     })
-    localStorage.setItem(this.userId, JSON.stringify(updatedList));
+    localStorage.setItem(userId, JSON.stringify(updatedList));
     this.setState({cartList: updatedList})
   }
 
@@ -79,7 +77,7 @@ class App extends Component {
       }
       return eachItem
     })
-   localStorage.setItem(this.userId, JSON.stringify(updatedList));
+   localStorage.setItem(userId, JSON.stringify(updatedList));
     this.setState({cartList: updatedList})
   }
 
@@ -103,11 +101,7 @@ class App extends Component {
             <Route exact path="/signup" component={SignUpForm} />
             <ProtectedRoute exact path="/" component={Home} />
             <ProtectedRoute exact path="/products" component={Products} />
-            <ProtectedRoute
-              exact
-              path="/products/:id"
-              component={ProductItemDetails}
-            />
+            <ProtectedRoute exact path="/products/:id"component={ProductItemDetails} />
             <ProtectedRoute exact path="/cart" component={Cart} />
             <Route path="/not-found" component={NotFound} />
             <Redirect to="not-found" />

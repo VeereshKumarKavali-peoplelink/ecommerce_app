@@ -3,9 +3,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 70vh;
+    margin-top: 15px;
   }
   .cart-img {
     width: 150px;
   }
   
+  .cart-heading{
+    align-self: flex-start;
+  }

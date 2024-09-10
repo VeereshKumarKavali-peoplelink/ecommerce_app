@@ -32,32 +32,9 @@ const initializeDbAndServer = async () => {
 initializeDbAndServer();
 
 
-// Define User Schema
-const userSchema = new mongoose.Schema({
-    username: String,
-    email: { type: String, unique: true },
-    password: String,
-    gender: String,
-});
 
-// Define Product Schema
-const productSchema = new mongoose.Schema({
-    title: String,
-    brand: String,
-    price: Number,
-    id: Number,
-    image_url: String,
-    rating: String,
-    style: String,
-    description: String,
-    total_reviews: Number,
-    availability: String
-
-
-});
-
-const User = mongoose.model("User", userSchema);
-const Product = mongoose.model("Product", productSchema);
+const User = require("./models/user");
+const Product = require("./models/product");
 
 function authenticateToken(request, response, next) {
     let jwtToken;
